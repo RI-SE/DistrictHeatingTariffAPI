@@ -1,0 +1,347 @@
+{
+  "tariffs": [
+    {
+      "id": "eba9dfe0-94ad-45e4-a3f0-9d42e391da84",
+      "name": "Företag 0-100 kW",
+      "description": "Illustrative business district heating tariff modeled on Göteborg Energi's published 2026 prices for the 0-100 kW subscribed-effect bracket. All four price components are used. NOTE: the energyPrice components only cover January, February, December, and July, the months for which Göteborg Energi's published figures were confirmed while authoring this sample (531 kr/MWh in Jan/Feb/Dec, 46 kr/MWh in Jul) - the remaining months are omitted here rather than guessed. See the operator's full published price list for the complete monthly table.",
+      "published": "2026-01-01T00:00:00+01:00",
+      "validPeriod": {
+        "fromIncluding": "2026-01-01",
+        "toExcluding": "2027-01-01"
+      },
+      "timeZone": "Europe/Stockholm",
+      "companyName": "Exempel Fjärrvärme AB",
+      "companyOrgNo": "123456-7890",
+      "product": "heat.consume.business.0-100kw",
+      "direction": "consumption",
+      "billingPeriod": "P1M",
+      "fixedPrice": {
+        "id": "3a234373-4519-4ec0-87b8-e7c3c189b065",
+        "name": "Fixed prices",
+        "description": "Fixed price components.",
+        "costFunction": "sum(price(c))",
+        "components": [
+          {
+            "id": "ef1ae7a6-dbaf-4695-8070-3e5bba47ca89",
+            "name": "Fixed effect fee",
+            "description": "Annual fixed fee for the 0-100 kW subscribed-effect bracket.",
+            "type": "public",
+            "reference": "main",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 10870,
+              "priceIncVat": 13587.5,
+              "currency": "SEK"
+            },
+            "pricedPeriod": "P1Y"
+          }
+        ]
+      },
+      "energyPrice": {
+        "id": "71bb0a78-bb97-43cf-a21a-b4d2f602ee60",
+        "name": "Energy prices",
+        "description": "Energy price components. Only a subset of months is included - see the tariff description.",
+        "costFunction": "sum(energy(c)*price(c))",
+        "components": [
+          {
+            "id": "e9319749-3f45-4fb8-84ee-8f5e55df0ebe",
+            "name": "Heat energy price, Jan-Feb",
+            "description": "Confirmed published rate for January and February 2026.",
+            "type": "fixed",
+            "reference": "high_season_jan_feb",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2026-03-01"
+            },
+            "price": {
+              "priceExVat": 531,
+              "priceIncVat": 663.75,
+              "currency": "SEK"
+            },
+            "unit": "MWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "cc8e686d-4578-4290-922e-92b8b5225141",
+            "name": "Heat energy price, Dec",
+            "description": "Confirmed published rate for December 2026.",
+            "type": "fixed",
+            "reference": "high_season_dec",
+            "validPeriod": {
+              "fromIncluding": "2026-12-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 531,
+              "priceIncVat": 663.75,
+              "currency": "SEK"
+            },
+            "unit": "MWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "d42babef-e34d-41dc-b96e-a49c5271c681",
+            "name": "Heat energy price, Jul",
+            "description": "Confirmed published rate for July 2026, the lowest of the year due to recovered/waste heat.",
+            "type": "fixed",
+            "reference": "low_season_jul",
+            "validPeriod": {
+              "fromIncluding": "2026-07-01",
+              "toExcluding": "2026-08-01"
+            },
+            "price": {
+              "priceExVat": 46,
+              "priceIncVat": 57.5,
+              "currency": "SEK"
+            },
+            "unit": "MWh",
+            "recurringPeriods": []
+          }
+        ]
+      },
+      "powerPrice": {
+        "id": "30cf6dbe-6675-4f28-8b56-b6766dee0786",
+        "name": "Power prices",
+        "description": "Effect fee based on the average of the three highest daily mean heat power values over the trailing 12 months.",
+        "costFunction": "sum(peak(c)*price(c))",
+        "components": [
+          {
+            "id": "0282d487-828f-4ce9-88b0-577849ce442f",
+            "name": "Effect fee, 0-100 kW bracket",
+            "description": "Variable rate per kW of subscribed effect for the 0-100 kW bracket.",
+            "type": "peak",
+            "reference": "main",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 1185,
+              "priceIncVat": 1481.25,
+              "currency": "SEK"
+            },
+            "unit": "kW",
+            "peakIdentificationSettings": {
+              "peakFunction": "peak(main)",
+              "peakIdentificationPeriod": "P1Y",
+              "peakDuration": "P1D",
+              "numberOfPeaksForAverageCalculation": 3
+            },
+            "recurringPeriods": []
+          }
+        ]
+      },
+      "efficiencyPrice": {
+        "id": "13d0039e-e6ad-435d-bb08-6bdfdde42b8e",
+        "name": "Efficiency prices",
+        "description": "Return-temperature-based efficiency component. Each facility's monthly return temperature is compared to the district network's system-average return temperature for the same month; a lower-than-average return temperature earns a credit, a higher-than-average return temperature incurs a surcharge. Applies only during the heating season (October-April).",
+        "costFunction": "sum(energy(c)*temperatureDeviation(c)*price(c))",
+        "components": [
+          {
+            "id": "55af3cec-759c-4d59-bf26-8bcf399de02f",
+            "name": "Return temperature component, Jan-Apr",
+            "description": "Heating-season part of the year that falls within this validPeriod.",
+            "measurementMethod": "returnTemperature",
+            "type": "public",
+            "reference": "heating_season_h1",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2026-05-01"
+            },
+            "price": {
+              "priceExVat": 7,
+              "priceIncVat": 8.75,
+              "currency": "SEK"
+            },
+            "unit": "MWh·°C",
+            "returnTemperatureSettings": {
+              "referenceSource": "systemAverage",
+              "measurementPeriod": "P1M"
+            },
+            "recurringPeriods": []
+          },
+          {
+            "id": "a9ada984-f29e-46d2-bacd-ffff3a2ea787",
+            "name": "Return temperature component, Oct-Dec",
+            "description": "Heating-season part of the year that falls within this validPeriod.",
+            "measurementMethod": "returnTemperature",
+            "type": "public",
+            "reference": "heating_season_h2",
+            "validPeriod": {
+              "fromIncluding": "2026-10-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 7,
+              "priceIncVat": 8.75,
+              "currency": "SEK"
+            },
+            "unit": "MWh·°C",
+            "returnTemperatureSettings": {
+              "referenceSource": "systemAverage",
+              "measurementPeriod": "P1M"
+            },
+            "recurringPeriods": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "d325bf96-823d-4c5d-ab2c-b48cfde9fa83",
+      "name": "Villa - Normalprislista (Äga)",
+      "description": "Illustrative private/residential district heating tariff modeled on Göteborg Energi's published 2026 normalprislista for villa customers who own their substation. Unlike the business tariff, there is no power/effect charge and no efficiency charge at all - only a fixed monthly nätavgift and a seasonally varying energy price.",
+      "published": "2026-01-01T00:00:00+01:00",
+      "validPeriod": {
+        "fromIncluding": "2026-01-01",
+        "toExcluding": "2027-01-01"
+      },
+      "timeZone": "Europe/Stockholm",
+      "companyName": "Exempel Fjärrvärme AB",
+      "companyOrgNo": "123456-7890",
+      "product": "heat.consume.private.normalprislista.aga",
+      "direction": "consumption",
+      "billingPeriod": "P1M",
+      "fixedPrice": {
+        "id": "3d52e263-92f7-473f-8e29-c9d873e4a864",
+        "name": "Fixed prices",
+        "description": "Fixed price components.",
+        "costFunction": "sum(price(c))",
+        "components": [
+          {
+            "id": "083abf88-1c2e-4132-b6c7-6e19713df73c",
+            "name": "Nätavgift",
+            "description": "Fixed monthly network fee.",
+            "type": "public",
+            "reference": "main",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 299.2,
+              "priceIncVat": 374,
+              "currency": "SEK"
+            },
+            "pricedPeriod": "P1M"
+          }
+        ]
+      },
+      "energyPrice": {
+        "id": "c55bcc9c-87e2-46d6-afd3-2c0c0b50080d",
+        "name": "Energy prices",
+        "description": "Seasonal energy price components.",
+        "costFunction": "sum(energy(c)*price(c))",
+        "components": [
+          {
+            "id": "05f3bc3e-844b-4ee5-96a7-5dfb3d167dd1",
+            "name": "Heat energy price, winter (Jan-Apr)",
+            "description": "Winter rate, part of the year that falls within this validPeriod.",
+            "type": "fixed",
+            "reference": "winter_h1",
+            "validPeriod": {
+              "fromIncluding": "2026-01-01",
+              "toExcluding": "2026-05-01"
+            },
+            "price": {
+              "priceExVat": 0.752,
+              "priceIncVat": 0.94,
+              "currency": "SEK"
+            },
+            "unit": "kWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "f6088873-f5b2-4f03-8e8f-e3a3e9cec1be",
+            "name": "Heat energy price, shoulder (May)",
+            "description": "Shoulder-season rate.",
+            "type": "fixed",
+            "reference": "shoulder_may",
+            "validPeriod": {
+              "fromIncluding": "2026-05-01",
+              "toExcluding": "2026-06-01"
+            },
+            "price": {
+              "priceExVat": 0.288,
+              "priceIncVat": 0.36,
+              "currency": "SEK"
+            },
+            "unit": "kWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "6d4b66a4-4962-4e8a-bb53-c2e2cc3bde94",
+            "name": "Heat energy price, summer (Jun-Aug)",
+            "description": "Summer rate, the cheapest of the year.",
+            "type": "fixed",
+            "reference": "summer",
+            "validPeriod": {
+              "fromIncluding": "2026-06-01",
+              "toExcluding": "2026-09-01"
+            },
+            "price": {
+              "priceExVat": 0.104,
+              "priceIncVat": 0.13,
+              "currency": "SEK"
+            },
+            "unit": "kWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "50c30395-3c1b-4532-86ea-e7af6ed558b0",
+            "name": "Heat energy price, shoulder (Sep)",
+            "description": "Shoulder-season rate.",
+            "type": "fixed",
+            "reference": "shoulder_sep",
+            "validPeriod": {
+              "fromIncluding": "2026-09-01",
+              "toExcluding": "2026-10-01"
+            },
+            "price": {
+              "priceExVat": 0.288,
+              "priceIncVat": 0.36,
+              "currency": "SEK"
+            },
+            "unit": "kWh",
+            "recurringPeriods": []
+          },
+          {
+            "id": "8995d829-85d6-41a2-ac55-1f716bf6606f",
+            "name": "Heat energy price, winter (Oct-Dec)",
+            "description": "Winter rate, part of the year that falls within this validPeriod.",
+            "type": "fixed",
+            "reference": "winter_h2",
+            "validPeriod": {
+              "fromIncluding": "2026-10-01",
+              "toExcluding": "2027-01-01"
+            },
+            "price": {
+              "priceExVat": 0.752,
+              "priceIncVat": 0.94,
+              "currency": "SEK"
+            },
+            "unit": "kWh",
+            "recurringPeriods": []
+          }
+        ]
+      },
+      "powerPrice": {
+        "id": "c77ee411-bf72-4a1d-98e5-bca63cff5e79",
+        "name": "Power prices",
+        "description": "No effect/power charge for this product.",
+        "costFunction": "sum(peak(c)*price(c))",
+        "components": []
+      },
+      "efficiencyPrice": {
+        "id": "ce8c78be-e1b8-4272-a902-5f95a65d7f3b",
+        "name": "Efficiency prices",
+        "description": "No volume or return-temperature charge for this product.",
+        "costFunction": "sum(volume(c)*price(c))",
+        "components": []
+      }
+    }
+  ],
+  "calendarPatterns": []
+}

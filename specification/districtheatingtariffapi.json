@@ -1,0 +1,520 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "District Heating Tariff API",
+    "description": "Provides district heating tariffs from district heating operators.",
+    "version": "0.1.0",
+    "contact": {
+      "name": "District Heating Tariff API",
+      "url": "https://github.com/RI-SE/district-heating-tariffAPI"
+    },
+    "license": {
+      "name": "Licence",
+      "url": "https://github.com/RI-SE/district-heating-tariffAPI/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Information",
+      "description": "Information about the API implementation."
+    },
+    {
+      "name": "Tariff",
+      "description": "District heating tariff related operations."
+    },
+    {
+      "name": "Price",
+      "description": "Price related operations."
+    }
+  ],
+  "paths": {
+    "/info": {
+      "get": {
+        "tags": [
+          "Information"
+        ],
+        "operationId": "GetInfo",
+        "summary": "Get information about the API implementation.",
+        "description": "Get information about the API implementation.",
+        "responses": {
+          "200": {
+            "description": "Information about the API implementation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotImplemented"
+          }
+        }
+      }
+    },
+    "/tariffs": {
+      "get": {
+        "tags": [
+          "Tariff"
+        ],
+        "operationId": "GetTariffs",
+        "summary": "Get a collection of publicly available tariffs for the district heating operator without any customer data.",
+        "description": "Get a collection of publicly available tariffs for the district heating operator without any customer data.",
+        "responses": {
+          "200": {
+            "description": "All publicly available tariffs without any customer data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotImplemented"
+          }
+        }
+      }
+    },
+    "/tariffs/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/IdInPath"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Tariff"
+        ],
+        "operationId": "GetTariffById",
+        "summary": "Get district heating tariff for the provided id.",
+        "description": "Get district heating tariff for the provided id.",
+        "responses": {
+          "200": {
+            "description": "Single district heating tariff object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotImplemented"
+          }
+        }
+      }
+    },
+    "/tariffs/search": {
+      "post": {
+        "tags": [
+          "Tariff"
+        ],
+        "operationId": "SearchTariffs",
+        "summary": "Search for district heating tariffs matching provided search parameters.",
+        "description": "Search for district heating tariffs matching provided search parameters.",
+        "requestBody": {
+          "description": "Search parameters.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TariffsSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tariffs matching the search criteria and mapping between tariff and search parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TariffsSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotImplemented"
+          }
+        }
+      }
+    },
+    "/prices": {
+      "parameters": [
+        {
+          "name": "componentId",
+          "description": "A price component id.",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "$ref": "common.schema.json#/definitions/Uuid"
+          }
+        },
+        {
+          "name": "product",
+          "description": "The product defined in the parent tariff object of the power or volume price component.",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "description": "The tariff product.",
+            "example": "EFFEKT_500KW",
+            "additionalProperties": false
+          }
+        },
+        {
+          "name": "date",
+          "description": "Get all defined prices for the given date.",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "$ref": "time.schema.json#/definitions/Date"
+          }
+        },
+        {
+          "name": "fromIncluding",
+          "description": "Get all defined prices from this time and forward. Default is today midnight.",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+          }
+        },
+        {
+          "name": "toExcluding",
+          "description": "Get all defined prices up to this time. Default is fromIncluding + 7 days.",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Price"
+        ],
+        "operationId": "GetPrices",
+        "summary": "Get prices for a price component.",
+        "description": "Returns prices for a price component for a given time period. The time period defaults to fromIncluding = today 00:00 and toExcluding = today 00:00 plus 7 full days. By looking 7 days ahead, forecasted prices are also returned.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Prices"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotImplemented"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "IdInPath": {
+        "name": "id",
+        "description": "Unique identifier for an object",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        }
+      }
+    },
+    "schemas": {
+      "InfoResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the implemented API.",
+            "default": "District Heating Tariff API"
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "Version of the implemented API specification.",
+            "example": "1.2.3"
+          },
+          "implementationVersion": {
+            "type": "string",
+            "description": "Version of the implementation. The format is set by the operator and can differ. In this example -r4 is the revision number of the implementation and the first three numbers the API version.",
+            "example": "1.2.3-r4"
+          },
+          "tariffDataLastUpdated": {
+            "description": "Timestamp that defines when the tariff data in /tariffs was last updated. Date-time in ISO 8601 / RFC 3339 style with required numeric offset in the form ±HH:MM.",
+            "allOf": [
+              { "$ref": "time.schema.json#/definitions/DateTimeWithOffset" }
+            ]
+          },
+          "operator": {
+            "type": "string",
+            "description": "Name of the company or organization operating this server.",
+            "example": "District Heating Company AB"
+          },
+          "timeZone": {
+            "$ref": "time.schema.json#/definitions/TimeZone"
+          },
+          "identityProviderUrl": {
+            "type": "string",
+            "description": "URL to the identity provider server which provides access tokens.",
+            "example": "https://idp.districtheatingcompany.se/oath2/token"
+          }
+        },
+        "required": [
+          "name",
+          "apiVersion",
+          "implementationVersion",
+          "tariffDataLastUpdated",
+          "operator",
+          "timeZone"
+        ],
+        "additionalProperties": true
+      },
+      "TariffsResponse": {
+        "type": "object",
+        "properties": {
+          "tariffs": {
+            "type": "array",
+            "items": {
+              "$ref": "tariff.schema.json#/definitions/Tariff"
+            }
+          },
+          "calendarPatterns": {
+            "type": "array",
+            "items": {
+              "$ref": "time.schema.json#/definitions/CalendarPattern"
+            }
+          }
+        },
+        "required": [
+          "tariffs",
+          "calendarPatterns"
+        ],
+        "additionalProperties": false
+      },
+      "TariffResponse": {
+        "type": "object",
+        "properties": {
+          "tariff": {
+            "$ref": "tariff.schema.json#/definitions/Tariff"
+          },
+          "calendarPatterns": {
+            "type": "array",
+            "items": {
+              "$ref": "time.schema.json#/definitions/CalendarPattern"
+            }
+          }
+        },
+        "required": [
+          "tariff",
+          "calendarPatterns"
+        ],
+        "additionalProperties": false
+      },
+      "TariffsSearchRequest": {
+        "type": "object",
+        "properties": {
+          "facilityIds": {
+            "type": "array",
+            "description": "List of facility IDs (anläggnings-ID) you are the registered owner of as a private person or your company has a legal reason to request in a customer/provider relationship.",
+            "items": {
+              "$ref": "common.schema.json#/definitions/FacilityId"
+            }
+          }
+        },
+        "required": [
+          "facilityIds"
+        ],
+        "additionalProperties": false
+      },
+      "TariffsSearchResponse": {
+        "type": "object",
+        "properties": {
+          "tariffs": {
+            "type": "array",
+            "items": {
+              "$ref": "tariff.schema.json#/definitions/Tariff"
+            }
+          },
+          "mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/definitions/TariffMapping"
+            }
+          }
+        },
+        "required": [
+          "tariffs",
+          "mappings"
+        ],
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code of the error."
+          },
+          "title": {
+            "type": "string",
+            "description": "A short, human-readable summary of the problem."
+          },
+          "detail": {
+            "type": "string",
+            "description": "A detailed message explaining the error. May include an URL to a help page."
+          }
+        },
+        "required": [
+          "status",
+          "title"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "responses": {
+      "Prices": {
+        "description": "The prices for the provided component id and time period.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "price.schema.json#/definitions/PricesResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "example": {
+              "status": 400,
+              "title": "Bad Request",
+              "detail": "The request object is invalid.",
+              "instance": "/endpoint"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "example": {
+              "status": 401,
+              "title": "Unauthorized",
+              "detail": "You do not have access to make this request.",
+              "instance": "/endpoint"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "example": {
+              "status": 403,
+              "title": "Forbidden",
+              "detail": "The request you made is not allowed.",
+              "instance": "/endpoint"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "example": {
+              "status": 404,
+              "title": "Not Found",
+              "detail": "The requested resource could not be found.",
+              "instance": "/endpoint"
+            }
+          }
+        }
+      },
+      "NotImplemented": {
+        "description": "Not Implemented",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            },
+            "example": {
+              "status": 501,
+              "title": "Not Implemented",
+              "detail": "The request method is not yet implemented on this server.",
+              "instance": "/endpoint"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "district-heating-tariffapi",
+  "private": true,
+  "description": "Specification for an API for District Heating Tariffs in Sweden.",
+  "scripts": {
+    "lint": "redocly lint specification/districtheatingtariffapi.json",
+    "bundle": "redocly bundle specification/districtheatingtariffapi.json --output dist/openapi.json --ext json",
+    "docs": "redocly preview-docs specification/districtheatingtariffapi.json"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.0.8",
+    "@stoplight/spectral-cli": "^6.15.0",
+    "@stoplight/spectral-rulesets": "^1.22.0"
+  }
+}

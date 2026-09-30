@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "FixedPriceComponent": {
+      "description": "A time period in which fixed price details are defined. Price components can be overlapping in time to define the full price for one time period. Typically used for the district heating subscription/connection fee (fast avgift), often based on subscribed effect (kW).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "type": {
+          "description": "Type describes if the price component is a publicly available price or customer specific.",
+          "type": "string",
+          "pattern": "public|specific",
+          "example": "public",
+          "default": "public"
+        },
+        "reference": {
+          "description": "Reference to be used to identify this recurring price period in the cost function.",
+          "type": "string",
+          "example": "main",
+          "default": "main"
+        },
+        "validPeriod": {
+          "$ref": "time.schema.json#/definitions/DateInterval"
+        },
+        "price": {
+          "$ref": "price.schema.json#/definitions/Price"
+        },
+        "pricedPeriod": {
+          "$ref": "time.schema.json#/definitions/Duration"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "reference",
+        "validPeriod",
+        "price",
+        "pricedPeriod"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

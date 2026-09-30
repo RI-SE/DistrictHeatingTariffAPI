@@ -1,0 +1,26 @@
+name: Lint OpenAPI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  OPENAPI_ENTRY: specification/districtheatingtariffapi.json
+  REDOCLY_VERSION: 2.0.8
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bundle OpenAPI
+        run: |
+          mkdir -p dist
+          npx --yes @redocly/cli@$REDOCLY_VERSION bundle "$OPENAPI_ENTRY" \
+            --output dist/openapi.json \
+            --ext json
+
+      - name: Lint OpenAPI (bundled)
+        run: npx --yes @redocly/cli@$REDOCLY_VERSION lint dist/openapi.json

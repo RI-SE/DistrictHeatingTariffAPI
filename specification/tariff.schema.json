@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "Tariff": {
+      "description": "Information about the tariff that are static and does not change during at least a month.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "description": "Descriptive short name of the district heating tariff.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Detailed description of the district heating tariff.",
+          "type": "string"
+        },
+        "published": {
+          "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+        },
+        "validPeriod": {
+          "$ref": "time.schema.json#/definitions/DateInterval"
+        },
+        "timeZone": {
+          "$ref": "time.schema.json#/definitions/TimeZone"
+        },
+        "companyName": {
+          "description": "Name of the district heating company.",
+          "type": "string"
+        },
+        "companyOrgNo": {
+          "description": "Organization number and unique identifier of the district heating company.",
+          "type": "string"
+        },
+        "product": {
+          "description": "A persistent and unique (on company level) reference to identify a given product during its entire lifecycle. If set, the reference allows for a seamless transition when a products tariff definition gets updated.",
+          "type": "string",
+          "example": "heat.consume.std.500kw"
+        },
+        "direction": {
+          "description": "Indicates if this is a tariff for consumption or production. Valid values are \"consumption\" and \"production\". \"production\" applies to decentralized heat producers feeding heat into the district heating network.",
+          "type": "string",
+          "pattern": "consumption|production",
+          "default": "consumption"
+        },
+        "billingPeriod": {
+          "$ref": "time.schema.json#/definitions/Duration"
+        },
+        "fixedPrice": {
+          "$ref": "tariff.schema.json#/definitions/FixedPrice"
+        },
+        "energyPrice": {
+          "$ref": "tariff.schema.json#/definitions/EnergyPrice"
+        },
+        "powerPrice": {
+          "$ref": "tariff.schema.json#/definitions/PowerPrice"
+        },
+        "efficiencyPrice": {
+          "$ref": "tariff.schema.json#/definitions/EfficiencyPrice"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "published",
+        "validPeriod",
+        "timeZone",
+        "companyName",
+        "companyOrgNo",
+        "product",
+        "direction",
+        "billingPeriod",
+        "fixedPrice",
+        "energyPrice",
+        "powerPrice",
+        "efficiencyPrice"
+      ],
+      "additionalProperties": false
+    },
+    "FixedPrice": {
+      "description": "Prices and information for the fixed price component of the tariff (e.g. the subscription/connection fee).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "costFunction": {
+          "$ref": "price.schema.json#/definitions/CostFunction"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "fixed.schema.json#/definitions/FixedPriceComponent"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "costFunction",
+        "components"
+      ],
+      "additionalProperties": false
+    },
+    "EnergyPrice": {
+      "description": "Prices and information for the energy price component of the tariff (price per unit of delivered heat energy).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "costFunction": {
+          "$ref": "price.schema.json#/definitions/CostFunction"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "energy.schema.json#/definitions/EnergyPriceComponent"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "costFunction",
+        "components"
+      ],
+      "additionalProperties": false
+    },
+    "PowerPrice": {
+      "description": "Prices with parameters that defines heat power peak identification and price calculation for the power/effect component of the tariff. Required on every tariff; use an empty components array if the tariff has no power/effect charge.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "costFunction": {
+          "$ref": "price.schema.json#/definitions/CostFunction"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "power.schema.json#/definitions/PowerPriceComponent"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "costFunction",
+        "components"
+      ],
+      "additionalProperties": false
+    },
+    "EfficiencyPrice": {
+      "description": "Prices and information for the efficiency price component of the tariff: pricing based on how efficiently a facility uses the heating medium, either per m³ of heating medium delivered or per degree of return-temperature deviation from a reference (see efficiency.schema.json#/definitions/EfficiencyPriceComponent). This is specific to district heating tariffs. Required on every tariff; use an empty components array if the tariff has no efficiency-related charge.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "costFunction": {
+          "$ref": "price.schema.json#/definitions/CostFunction"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "efficiency.schema.json#/definitions/EfficiencyPriceComponent"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "costFunction",
+        "components"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

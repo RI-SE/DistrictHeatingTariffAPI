@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "EnergyPriceComponent": {
+      "description": "A time period in which energy price details are defined. Price components can be overlapping in time to define the full price for one time period. Represents the price per unit of delivered heat energy (energipris), typically SEK/MWh.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "fixed|spot",
+          "example": "fixed",
+          "default": "fixed"
+        },
+        "reference": {
+          "description": "Reference to be used to identify this recurring price period in the cost function.",
+          "type": "string",
+          "example": "high",
+          "default": "main"
+        },
+        "validPeriod": {
+          "$ref": "time.schema.json#/definitions/DateInterval"
+        },
+        "price": {
+          "$ref": "price.schema.json#/definitions/Price"
+        },
+        "unit": {
+          "description": "Unit of energy measurement for the price rate (e.g., kWh, MWh).",
+          "type": "string",
+          "example": "MWh",
+          "additionalProperties": false
+        },
+        "spotPriceSettings": {
+          "$ref": "energy.schema.json#/definitions/SpotPriceSettings"
+        },
+        "recurringPeriods": {
+          "type": "array",
+          "items": {
+            "$ref": "time.schema.json#/definitions/RecurringPeriod"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "reference",
+        "validPeriod",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "SpotPriceSettings": {
+      "description": "Settings for a spot price relative pricing component. Not commonly used for district heating, but included for operators with market-indexed energy pricing.",
+      "type": "object",
+      "properties": {
+        "multiplier": {
+          "description": "A number used to multiply the reference market price to get a price for this price component.",
+          "type": "number",
+          "example": 1.25
+        },
+        "currency": {
+          "$ref": "price.schema.json#/definitions/Currency"
+        }
+      },
+      "required": [
+        "multiplier",
+        "currency"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

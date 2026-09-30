@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "Price": {
+      "description": "Price, VAT and currency.",
+      "type": "object",
+      "properties": {
+        "priceExVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 171.32
+        },
+        "priceIncVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 171.32
+        },
+        "currency": {
+          "$ref": "price.schema.json#/definitions/Currency"
+        }
+      },
+      "required": [
+        "priceExVat",
+        "priceIncVat",
+        "currency"
+      ],
+      "additionalProperties": false
+    },
+    "PricesResponse": {
+      "description": "Time differentiated prices for a price component.",
+      "type": "object",
+      "properties": {
+        "currency": {
+          "$ref": "price.schema.json#/definitions/Currency"
+        },
+        "unit": {
+          "description": "Unit for the price rate (e.g., kW, MWh, m³) for each entry in the actual and preview price lists.",
+          "type": "string",
+          "example": "MWh",
+          "additionalProperties": false
+        },
+        "actual": {
+          "type": "array",
+          "items": {
+            "$ref": "price.schema.json#/definitions/PriceListEntry"
+          }
+        },
+        "preview": {
+          "type": "array",
+          "items": {
+            "$ref": "price.schema.json#/definitions/PriceListEntry"
+          }
+        }
+      },
+      "required": [
+        "currency",
+        "unit",
+        "actual"
+      ],
+      "additionalProperties": true
+    },
+    "PriceListEntry": {
+      "description": "A timed price entry that belongs to a price list.",
+      "type": "object",
+      "properties": {
+        "created": {
+          "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+        },
+        "start": {
+          "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+        },
+        "end": {
+          "$ref": "time.schema.json#/definitions/DateTimeWithOffset"
+        },
+        "priceExVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 100
+        },
+        "priceIncVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 125
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "priceExVat",
+        "priceIncVat"
+      ],
+      "additionalProperties": false
+    },
+    "CostFunction": {
+      "description": "A pseudo code function that describes how to calculate the cost for a set of price components. Check DEVELOPER_GUIDE.md for usage examples.",
+      "type": "string",
+      "example": "sum(energy(c)*price(c))",
+      "additionalProperties": false
+    },
+    "Currency": {
+      "description": "The currency for all related prices.",
+      "type": "string",
+      "example": "SEK",
+      "additionalProperties": false
+    }
+  }
+}

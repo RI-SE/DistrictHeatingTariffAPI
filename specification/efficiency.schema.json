@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "EfficiencyPriceComponent": {
+      "description": "A time period in which efficiency price details are defined. Price components can be overlapping in time to define the full price for one time period. This is specific to district heating: it prices how efficiently a facility uses the heating medium (typically water) to extract heat energy. District heating operators use one of two equivalent physical proxies for this, distinguished by `measurementMethod`: the volume of heating medium delivered per unit of energy (more volume for the same energy means a lower temperature differential, i.e. lower efficiency), or the facility's return temperature compared to a system reference (a lower return temperature means more heat was extracted, i.e. higher efficiency). Both follow from energy = volume × specific heat × temperature differential, so an operator may price by either — or in principle both — but not necessarily both at once.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "measurementMethod": {
+          "description": "How installation efficiency is measured and priced for this component. 'volume': priced per unit of heating medium delivered (e.g. SEK/m³), independent of temperature. 'returnTemperature': priced per unit of energy delivered multiplied by the deviation between the facility's measured return temperature and a reference temperature (e.g. SEK/(MWh·°C)); see `returnTemperatureSettings`.",
+          "type": "string",
+          "pattern": "volume|returnTemperature",
+          "example": "returnTemperature",
+          "default": "volume"
+        },
+        "type": {
+          "description": "Type describes if the price component is a publicly available price or customer specific.",
+          "type": "string",
+          "pattern": "public|specific",
+          "example": "public",
+          "default": "public"
+        },
+        "reference": {
+          "description": "Reference to be used to identify this recurring price period in the cost function.",
+          "type": "string",
+          "example": "main",
+          "default": "main"
+        },
+        "validPeriod": {
+          "$ref": "time.schema.json#/definitions/DateInterval"
+        },
+        "price": {
+          "$ref": "price.schema.json#/definitions/Price"
+        },
+        "unit": {
+          "description": "Unit for the price rate. For `measurementMethod` 'volume', a volume unit (e.g. m³). For 'returnTemperature', a compound unit of energy and temperature (e.g. MWh·°C).",
+          "type": "string",
+          "example": "MWh·°C",
+          "additionalProperties": false
+        },
+        "returnTemperatureSettings": {
+          "$ref": "efficiency.schema.json#/definitions/ReturnTemperatureSettings"
+        },
+        "recurringPeriods": {
+          "type": "array",
+          "items": {
+            "$ref": "time.schema.json#/definitions/RecurringPeriod"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "measurementMethod",
+        "type",
+        "reference",
+        "validPeriod",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "ReturnTemperatureSettings": {
+      "description": "Settings that define what a facility's measured return temperature is compared against for a 'returnTemperature' efficiency price component. Required when `measurementMethod` is 'returnTemperature'.",
+      "type": "object",
+      "properties": {
+        "referenceSource": {
+          "description": "How the reference temperature is determined. 'fixed': a contracted constant value, given in `fixedReferenceTemperature`. 'systemAverage': the district heating network's average return temperature for the same `measurementPeriod`, determined by the operator from network telemetry and not necessarily exposed through this API.",
+          "type": "string",
+          "pattern": "fixed|systemAverage",
+          "example": "systemAverage",
+          "default": "systemAverage"
+        },
+        "fixedReferenceTemperature": {
+          "description": "The reference return temperature in degrees Celsius. Required when `referenceSource` is 'fixed'.",
+          "type": "number",
+          "example": 40
+        },
+        "measurementPeriod": {
+          "description": "The period over which the facility's return temperature and the reference temperature are averaged and compared, e.g. one calendar month.",
+          "allOf": [
+            { "$ref": "time.schema.json#/definitions/Duration" }
+          ],
+          "example": "P1M"
+        }
+      },
+      "required": [
+        "referenceSource",
+        "measurementPeriod"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

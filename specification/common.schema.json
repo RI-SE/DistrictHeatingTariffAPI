@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "Uuid": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique identifier",
+      "example": "216783ff-5dda-4c38-b491-d6f0fcee9a9b",
+      "additionalProperties": false
+    },
+    "Name": {
+      "type": "string",
+      "description": "A short human readable name.",
+      "example": "Descriptive name",
+      "additionalProperties": false
+    },
+    "Description": {
+      "description": "A longer explanatory text.",
+      "type": "string",
+      "example": "Fixed price for a contract with a subscribed effect of 100 kW.",
+      "additionalProperties": false
+    },
+    "FacilityId": {
+      "type": "string",
+      "description": "Identifier for a physical district heating facility/delivery point (anläggnings-ID). The format is defined by the operator, since there is no national identifier scheme for district heating facilities equivalent to the electricity grid's GSRN.",
+      "example": "SE-VAXHOLM-000123",
+      "additionalProperties": false
+    },
+    "TariffMapping": {
+      "type": "object",
+      "properties": {
+        "tariffId": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "facilityIds": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/definitions/FacilityId"
+          }
+        }
+      },
+      "required": [
+        "tariffId",
+        "facilityIds"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

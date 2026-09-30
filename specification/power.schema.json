@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "PowerPriceComponent": {
+      "description": "A time period in which power price details are defined. Price components can be overlapping in time to define the full price for one time period. Represents the district heating demand/effect charge (effektavgift), typically based on peak heat power (kW) drawn during a billing period.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/definitions/Uuid"
+        },
+        "name": {
+          "$ref": "common.schema.json#/definitions/Name"
+        },
+        "description": {
+          "$ref": "common.schema.json#/definitions/Description"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "peak|dynamic",
+          "example": "peak",
+          "default": "peak"
+        },
+        "reference": {
+          "description": "Reference to be used to identify this recurring price period in the cost function.",
+          "type": "string",
+          "example": "high",
+          "default": "main"
+        },
+        "validPeriod": {
+          "$ref": "time.schema.json#/definitions/DateInterval"
+        },
+        "price": {
+          "$ref": "price.schema.json#/definitions/Price"
+        },
+        "unit": {
+          "description": "Unit for the power price rate (e.g., kW). Can represent average heat power over a fixed interval (e.g., 4 kW over 1 hour) or equivalent energy consumption within that interval.",
+          "type": "string",
+          "example": "kW",
+          "additionalProperties": false
+        },
+        "url": {
+          "type": "string",
+          "description": "URL string that is either a root relative or absolute path to the prices endpoint. It must follow the /prices path defined in this specification.",
+          "example": "/prices?product=EFFEKT_500KW",
+          "additionalProperties": false
+        },
+        "peakIdentificationSettings": {
+          "$ref": "power.schema.json#/definitions/PeakIdentificationSettings"
+        },
+        "recurringPeriods": {
+          "type": "array",
+          "items": {
+            "$ref": "time.schema.json#/definitions/RecurringPeriod"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "reference",
+        "validPeriod"
+      ],
+      "additionalProperties": false
+    },
+    "PeakIdentificationSettings": {
+      "description": "Settings that defines how to identify a heat power peak during a billing period.",
+      "type": "object",
+      "properties": {
+        "peakFunction": {
+          "$ref": "power.schema.json#/definitions/PeakFunction"
+        },
+        "peakIdentificationPeriod": {
+          "$ref": "time.schema.json#/definitions/Duration"
+        },
+        "peakDuration": {
+          "$ref": "time.schema.json#/definitions/Duration"
+        },
+        "numberOfPeaksForAverageCalculation": {
+          "description": "The number of peaks within a peak pricing period for calculating average peak for that period.",
+          "type": "integer",
+          "example": 3
+        }
+      },
+      "required": [
+        "peakFunction",
+        "peakIdentificationPeriod",
+        "peakDuration",
+        "numberOfPeaksForAverageCalculation"
+      ],
+      "additionalProperties": false
+    },
+    "PeakFunction": {
+      "description": "A pseudo code function that describes how to identify a power peak for one power price component. Check DEVELOPER_GUIDE.md for usage examples.",
+      "type": "string",
+      "example": "max(peak(high),peak(low)/2)",
+      "default": "peak(main)",
+      "additionalProperties": false
+    }
+  }
+}
