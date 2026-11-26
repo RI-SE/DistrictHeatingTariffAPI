@@ -15,6 +15,13 @@ This directory contains sample JSON responses demonstrating district heating tar
   - `energyPrice`: per-kWh heat energy price, differentiated by season (summer/shoulder/winter)
   - `powerPrice` and `efficiencyPrice` are both present but empty - Göteborg Energi's residential tariff has no effect charge and no efficiency charge at all
 
+**[tiered-tariffs-response.json](tiered-tariffs-response.json)**
+- **Företag** (business): the same business tariff as above, but covering all six power tiers of the price list in one tariff by using tiered prices instead of one tariff per tier.
+  - `fixedPrice`: annual fixed fee as a `stepped` tiered price, selected by the heat power peak of the power price component (`tierBasis` `peak(main)`)
+  - `powerPrice`: effect fee as a `volume` tiered price, where the whole peak is priced at the rate of the tier it falls in
+  - `energyPrice` and `efficiencyPrice`: unchanged, with constant prices
+  - See [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md#tieredprice-stafflade-priser) for how tiered prices work
+
 ## Why these two examples
 
 Comparing a real business and private tariff from the same operator shows the range the spec needs to cover:

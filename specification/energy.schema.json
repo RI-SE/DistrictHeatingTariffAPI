@@ -30,7 +30,14 @@
           "$ref": "time.schema.json#/definitions/DateInterval"
         },
         "price": {
-          "$ref": "price.schema.json#/definitions/Price"
+          "oneOf": [
+            {
+              "$ref": "price.schema.json#/definitions/Price"
+            },
+            {
+              "$ref": "price.schema.json#/definitions/TieredPrice"
+            }
+          ]
         },
         "unit": {
           "description": "Unit of energy measurement for the price rate (e.g., kWh, MWh).",
