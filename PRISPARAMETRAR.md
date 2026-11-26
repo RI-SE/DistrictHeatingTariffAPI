@@ -31,6 +31,8 @@ En fast årsavgift som beror på vilket effektintervall (kW-band) kunden abonner
 
 I specifikationen anges varje sådan avgift med ett pris, en giltighetsperiod (`validPeriod`) och en period den gäller för (`pricedPeriod`, t.ex. "en månad" eller "ett år"). Flera fasta avgifter kan förekomma i samma tariff om olika delar av avgiften gäller olika tidsperioder.
 
+Priset är antingen ett enda belopp, som privatkundens nätavgift, eller ett stafflat pris med ett belopp per effektintervall, som företagskundens årsavgift. Se avsnittet [Stafflade priser](#stafflade-priser) nedan.
+
 ## 2. Energipris (`energyPrice`)
 
 Energipriset är priset per levererad energienhet (kWh eller MWh) värme. Det är den del av notan som direkt speglar hur mycket värme kunden faktiskt förbrukat.
@@ -61,7 +63,9 @@ Göteborg Energi definierar en kunds relevanta toppeffekt som **genomsnittet av 
 | 1 000-2 500 kW | 101 520 | 995 |
 | > 2 500 kW | 229 020 | 944 |
 
-Den rörliga delen (kr/kW/år) hör hemma i `powerPrice`, medan den fasta delen för samma band hör hemma i `fixedPrice` (se avsnitt 1) - de två delarna av tabellen ovan blir alltså två olika priskomponenter i specifikationen, trots att de kommer från samma prislista.
+Den rörliga delen (kr/kW/år) hör hemma i `powerPrice`, medan den fasta delen hör hemma i `fixedPrice` (se avsnitt 1) - de två kolumnerna i tabellen ovan blir alltså två olika priskomponenter i specifikationen, trots att de kommer från samma prislista.
+
+Båda kolumnerna är stafflade priser: priset beror på vilket effektintervall kundens toppeffekt hamnar i. Hela tabellen kan därför beskrivas i en enda tariff, med en priskomponent per kolumn, i stället för en tariff per effektintervall. Hur det går till beskrivs i avsnittet [Stafflade priser](#stafflade-priser) nedan.
 
 Villakunder hos Göteborg Energi har ingen effektavgift alls - för dem är `powerPrice` en tom lista av komponenter.
 
@@ -93,6 +97,90 @@ Konstruktionen är alltså intäktsneutral för Göteborg Energi i grunden - den
 ### Varför inte två separata pristyper?
 
 Eftersom volym och returtemperaturavvikelse är två sätt att mäta samma underliggande effektivitet, och en given fjärrvärmeleverantör normalt bara använder den ena metoden (aldrig båda samtidigt för samma kund), är det både enklare och mer korrekt att modellera dem som en gemensam pristyp med en metodangivelse, snarare än att tvinga varje implementation att ta ställning till två helt separata fält där bara ett någonsin är relevant.
+
+## Stafflade priser
+
+Ett stafflat pris är ett pris som beror på hur stor en viss mängd är, till exempel kundens toppeffekt eller årets energivolym. Mängden delas in i nivåer, och varje nivå har sitt eget pris. Det är inte en femte pristyp, utan ett sätt att ange priset i en fast avgift, ett energipris eller en effektavgift. Ett pris som inte är stafflat anges precis som tidigare, med ett enda belopp.
+
+Ett stafflat pris anges med fyra uppgifter:
+
+| Uppgift | Fält | Innebörd |
+|---|---|---|
+| Enhet | `tierUnit` | Enheten för nivåernas gränser, t.ex. kW eller MWh. |
+| Underlag | `tierBasis` | Vilken mängd som avgör nivån, t.ex. toppeffekten i effektavgiften. Kan utelämnas när det är komponentens egen mängd som avses. |
+| Beräkningssätt | `tierMode` | Hur nivåns pris används, se nedan. |
+| Nivåer | `tiers` | En rad per nivå, med nivåns nedre gräns (`fromIncluding`) och dess pris. |
+
+För en mängd som summeras över tid, som energi, anges dessutom vilken period mängden räknas över (`tierPeriod`, t.ex. ett år).
+
+### Nivåernas gränser
+
+Varje nivå anges bara med sin nedre gräns. Nivån gäller från och med den gränsen fram till nästa nivås gräns, och den sista nivån saknar övre gräns. Den första nivån börjar alltid på 0. På så sätt hamnar varje mängd i exakt en nivå, utan luckor och utan överlapp.
+
+En mängd som ligger precis på en gräns tillhör den övre nivån. Med prislistans intervall "0-100 kW" och "100-250 kW" räknas alltså exakt 100 kW till nivån 100-250 kW.
+
+### Tre beräkningssätt
+
+Det som skiljer stafflade priser åt är vad nivåns pris betyder. Specifikationen har tre beräkningssätt:
+
+| `tierMode` | Nivåns pris är | Kostnaden blir |
+|---|---|---|
+| `stepped` | Ett belopp för hela perioden | Beloppet för den nivå mängden hamnar i. Kostnaden är densamma inom hela nivån och ändras språngvis vid varje gräns, som en trappa. |
+| `volume` | Ett pris per enhet | Hela mängden gånger priset för den nivå mängden hamnar i. |
+| `graduated` | Ett pris per enhet | Varje del av mängden gånger priset för sin egen nivå. Kostnaden växer utan språng, men lutningen ändras vid varje gräns. |
+
+### Exempel: Göteborg Energis effekttabell
+
+Tabellen i avsnitt 3 innehåller två stafflade priser som båda styrs av samma toppeffekt:
+
+- **Fast avgift (kr/år)** är ett stafflat pris med beräkningssättet `stepped` i `fixedPrice`. Underlaget är toppeffekten i effektavgiften.
+- **Rörlig avgift (kr/kW/år)** är ett stafflat pris med beräkningssättet `volume` i `powerPrice`. Hela toppeffekten prissätts med priset för den nivå den hamnar i.
+
+Den fasta avgiften ser ut så här i datan (den rörliga är uppbyggd på samma sätt, med `volume` och kolumnens priser per kW):
+
+```json
+"price": {
+  "currency": "SEK",
+  "tierUnit": "kW",
+  "tierBasis": "peak(main)",
+  "tierMode": "stepped",
+  "tiers": [
+    { "fromIncluding": 0,    "priceExVat": 10870,  "priceIncVat": 13587.50 },
+    { "fromIncluding": 100,  "priceExVat": 15270,  "priceIncVat": 19087.50 },
+    { "fromIncluding": 250,  "priceExVat": 27020,  "priceIncVat": 33775.00 },
+    { "fromIncluding": 500,  "priceExVat": 51520,  "priceIncVat": 64400.00 },
+    { "fromIncluding": 1000, "priceExVat": 101520, "priceIncVat": 126900.00 },
+    { "fromIncluding": 2500, "priceExVat": 229020, "priceIncVat": 286275.00 }
+  ]
+}
+```
+
+**Räkneexempel:** en kund med toppeffekten 180 kW hamnar i nivån 100-250 kW.
+
+- Fast avgift: 15 270 kr/år.
+- Rörlig avgift: 180 × 1 141 = 205 380 kr/år.
+- Summa: 220 650 kr/år exklusive moms.
+
+De två kolumnerna hör ihop. Den rörliga avgiften för sig sjunker vid en gräns: strax under 100 kW kostar den omkring 118 400 kr, vid 100 kW 114 100 kr. Den fasta avgiften stiger samtidigt med lika mycket, så summan av de två blir densamma på båda sidor om gränsen: 129 370 kr vid 100 kW. Den totala kostnaden växer alltså utan språng, med en lägre kostnad per ytterligare kW ju högre effekten är.
+
+Hela tariffen finns som exempelfil i `samples/tiered-tariffs-response.json`.
+
+### Exempel: energipris där varje del prissätts för sig
+
+Beräkningssättet `graduated` förekommer inte i Göteborg Energis prislista. Siffrorna nedan är påhittade för att visa skillnaden mot `volume`:
+
+| Årsvolym | Energipris (kr/MWh) |
+|---|---|
+| 0-50 MWh | 600 |
+| 50-200 MWh | 550 |
+| > 200 MWh | 500 |
+
+En kund som använder 120 MWh under året betalar:
+
+- Med `graduated`: 50 × 600 + 70 × 550 = 68 500 kr. De första 50 MWh kostar 600 kr/MWh och de följande 70 MWh kostar 550 kr/MWh.
+- Med `volume`: 120 × 550 = 66 000 kr. Hela volymen får priset för den nivå som 120 MWh hamnar i.
+
+Samma tabell ger alltså olika kostnad beroende på beräkningssättet, och därför måste det alltid anges.
 
 ## Källor
 

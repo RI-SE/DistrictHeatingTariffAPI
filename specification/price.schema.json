@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "definitions": {
     "Price": {
-      "description": "Price, VAT and currency.",
+      "description": "A constant price with VAT and currency. For a price that varies with a quantity, see TieredPrice.",
       "type": "object",
       "properties": {
         "priceExVat": {
@@ -23,6 +23,80 @@
         "priceExVat",
         "priceIncVat",
         "currency"
+      ],
+      "additionalProperties": false
+    },
+    "TieredPrice": {
+      "description": "A price that depends on which tier a quantity falls in (stafflat pris). Tiers are listed in ascending order of fromIncluding, the first tier starts at 0, and each tier ends where the next one begins. The quantity compared with the tiers is given by tierBasis and, when tierPeriod is present, accumulated over that period. Check DEVELOPER_GUIDE.md for usage examples.",
+      "type": "object",
+      "properties": {
+        "currency": {
+          "$ref": "price.schema.json#/definitions/Currency"
+        },
+        "tierUnit": {
+          "description": "Unit of the tier thresholds (e.g., kW, MWh). Independent of the unit of the price component itself, so that a fixed price can be tiered on power.",
+          "type": "string",
+          "example": "kW"
+        },
+        "tierBasis": {
+          "description": "A pseudo code expression for the quantity that selects the tier. When omitted, the quantity priced by the component itself is used, which requires a power or energy price component. Check DEVELOPER_GUIDE.md for usage examples.",
+          "type": "string",
+          "example": "peak(main)"
+        },
+        "tierMode": {
+          "description": "How the price of a tier is applied.\n- stepped: the tier price is the full amount for the priced period, not multiplied by any quantity. The cost is a staircase.\n- volume: the tier price is a price per unit and the whole quantity is priced at the rate of the tier it falls in.\n- graduated: the tier price is a price per unit and each part of the quantity is priced at the rate of its own tier. The cost is a continuous line that changes slope at each threshold.",
+          "type": "string",
+          "enum": [
+            "stepped",
+            "volume",
+            "graduated"
+          ],
+          "example": "volume"
+        },
+        "tierPeriod": {
+          "$ref": "time.schema.json#/definitions/Duration"
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "price.schema.json#/definitions/PriceTier"
+          }
+        }
+      },
+      "required": [
+        "currency",
+        "tierUnit",
+        "tierMode",
+        "tiers"
+      ],
+      "additionalProperties": false
+    },
+    "PriceTier": {
+      "description": "One tier of a tiered price, valid from its lower threshold up to the lower threshold of the next tier. The last tier has no upper limit.",
+      "type": "object",
+      "properties": {
+        "fromIncluding": {
+          "description": "Lower threshold of the tier, expressed in tierUnit.",
+          "type": "number",
+          "minimum": 0,
+          "example": 100
+        },
+        "priceExVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 1141
+        },
+        "priceIncVat": {
+          "type": "number",
+          "format": "decimal",
+          "example": 1426.25
+        }
+      },
+      "required": [
+        "fromIncluding",
+        "priceExVat",
+        "priceIncVat"
       ],
       "additionalProperties": false
     },

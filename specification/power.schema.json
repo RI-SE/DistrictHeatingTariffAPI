@@ -30,7 +30,14 @@
           "$ref": "time.schema.json#/definitions/DateInterval"
         },
         "price": {
-          "$ref": "price.schema.json#/definitions/Price"
+          "oneOf": [
+            {
+              "$ref": "price.schema.json#/definitions/Price"
+            },
+            {
+              "$ref": "price.schema.json#/definitions/TieredPrice"
+            }
+          ]
         },
         "unit": {
           "description": "Unit for the power price rate (e.g., kW). Can represent average heat power over a fixed interval (e.g., 4 kW over 1 hour) or equivalent energy consumption within that interval.",
